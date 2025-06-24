@@ -1,0 +1,43 @@
+[package]
+name = "ducklake"
+version = "0.1.0"
+edition = "2021"
+authors = ["Your Name <your.email@example.com>"]
+description = "A Rust implementation of the DuckLake lakehouse format specification"
+license = "MIT"
+repository = "https://github.com/your-username/ducklake-rs"
+keywords = ["lakehouse", "data", "parquet", "sql", "duckdb"]
+categories = ["database", "data-structures"]
+readme = "README.md"
+
+[lib]
+name = "ducklake"
+path = "src/lib.rs"
+
+[dependencies]
+sqlx = { version = "0.7", features = [
+    "runtime-tokio-rustls",
+    "any",
+    "postgres",
+    "mysql",
+    "sqlite",
+    "uuid",
+    "chrono",
+    "migrate",
+] }
+tokio = { version = "1.0", features = ["full"] }
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1.0", features = ["v4", "serde"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+anyhow = "1.0"
+thiserror = "1.0"
+
+[dev-dependencies]
+env_logger = "0.10"
+tokio = { version = "1.0", features = ["macros", "rt-multi-thread"] }
+
+[[example]]
+name = "basic"
+path = "examples/basic.rs"
+required-features = ["sqlx/any", "sqlx/sqlite", "sqlx/postgres", "sqlx/mysql"]
