@@ -1,46 +1,40 @@
-[package]
-name = "ducklake"
-version = "0.1.0"
-edition = "2021"
-authors = ["Your Name <your.email@example.com>"]
-description = "A Rust implementation of the DuckLake lakehouse format specification"
-license = "MIT"
-repository = "https://github.com/your-username/ducklake-rs"
-keywords = ["lakehouse", "data", "parquet", "sql", "duckdb"]
-categories = ["database", "data-structures"]
-readme = "README.md"
+[workspace]
+members = [
+    "crates/ducklake-core",
+    "crates/ducklake-storage",
+    "crates/ducklake-parquet",
+    "crates/ducklake",
+    "crates/ducklake-cli",
+]
+resolver = "2"
 
-[lib]
-name = "ducklake"
-path = "src/lib.rs"
-
-[dependencies]
-sqlx = { version = "0.8.6", features = [
+[workspace.dependencies]
+# Shared dependencies across all crates
+sqlx = { version = "0.7", features = [
     "runtime-tokio-rustls",
-    "any",
     "postgres",
-    "mysql",
     "sqlite",
     "uuid",
     "chrono",
-    "migrate",
 ] }
 tokio = { version = "1.0", features = ["full"] }
-chrono = { version = "0.4", features = ["serde"] }
 uuid = { version = "1.0", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-anyhow = "1.0"
 thiserror = "1.0"
+async-trait = "0.1"
+tracing = "0.1"
+tracing-subscriber = "0.3"
 
-[dev-dependencies]
-env_logger = "0.10"
-tokio = { version = "1.0", features = ["macros", "rt-multi-thread"] }
+# Arrow/Parquet ecosystem
+arrow = "55.0"
+parquet = "55.0"
+datafusion = "47.0"
 
-[[example]]
-name = "basic"
-path = "examples/basic.rs"
+# Object storage
+object_store = { version = "0.9", features = ["aws", "gcp", "azure"] }
+aws-sdk-s3 = "1.0"
 
-[[example]]
-name = "full_api"
-path = "examples/full_api.rs"
+# CLI
+clap = { version = "4.0", features = ["derive", "env"] }

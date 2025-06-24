@@ -15,6 +15,12 @@ pub enum DuckLakeError {
     #[error("Configuration error: {message}")]
     Config { message: String },
 
+    #[error("Configuration error: {0}")]
+    ConfigError(String),
+
+    #[error("Storage error: {0}")]
+    StorageError(String),
+
     #[error("Invalid snapshot: {snapshot_id}")]
     InvalidSnapshot { snapshot_id: i64 },
 

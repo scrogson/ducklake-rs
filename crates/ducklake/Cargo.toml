@@ -1,0 +1,49 @@
+[package]
+name = "ducklake"
+version = "0.1.0"
+edition = "2021"
+authors = ["Your Name <your.email@example.com>"]
+description = "A Rust implementation of the DuckLake lakehouse format specification"
+license = "MIT"
+repository = "https://github.com/your-username/ducklake-rs"
+keywords = ["lakehouse", "data", "parquet", "sql", "duckdb"]
+categories = ["database", "data-structures"]
+readme = "../../README.md"
+
+[lib]
+name = "ducklake"
+path = "src/lib.rs"
+
+[dependencies]
+tokio = { workspace = true }
+serde = { workspace = true }
+thiserror = { workspace = true }
+async-trait = { workspace = true }
+tracing = { workspace = true }
+sqlx = { workspace = true }
+uuid = { workspace = true }
+arrow = { workspace = true }
+
+# Internal dependencies - the main crate orchestrates everything
+ducklake-core = { path = "../ducklake-core" }
+ducklake-storage = { path = "../ducklake-storage" }
+ducklake-parquet = { path = "../ducklake-parquet" }
+
+[features]
+default = ["local"]
+full = ["local", "s3", "gcp", "azure"]
+local = ["ducklake-storage/local"]
+s3 = ["ducklake-storage/s3"]
+gcp = ["ducklake-storage/gcp"]
+azure = ["ducklake-storage/azure"]
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
+
+[[example]]
+name = "basic"
+path = "../../examples/basic.rs"
+
+[[example]]
+name = "full_api"
+path = "../../examples/full_api.rs"

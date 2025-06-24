@@ -1,0 +1,26 @@
+[package]
+name = "ducklake-storage"
+version = "0.1.0"
+edition = "2021"
+description = "File system abstraction for DuckLake (S3, GCS, Azure, Local)"
+license = "MIT"
+
+[dependencies]
+tokio = { workspace = true }
+serde = { workspace = true }
+thiserror = { workspace = true }
+async-trait = { workspace = true }
+tracing = { workspace = true }
+chrono = { workspace = true }
+object_store = { workspace = true }
+
+# Optional cloud storage providers
+aws-sdk-s3 = { workspace = true, optional = true }
+
+[features]
+default = ["local"]
+local = []
+s3 = ["aws-sdk-s3"]
+gcp = ["object_store/gcp"]
+azure = ["object_store/azure"]
+all-clouds = ["s3", "gcp", "azure"]

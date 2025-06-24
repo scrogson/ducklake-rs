@@ -47,6 +47,7 @@ impl Database {
         // Use database-specific version query
         let version_query = match self.get_database_type().await? {
             DatabaseType::PostgreSQL => "SELECT version()",
+            DatabaseType::Postgres => "SELECT version()",
             DatabaseType::MySQL => "SELECT VERSION()",
             DatabaseType::SQLite => "SELECT sqlite_version()",
         };
@@ -81,10 +82,26 @@ impl Database {
     }
 }
 
+/// Create a database connection pool (standalone function)
+pub async fn create_pool(database_url: &str, db_type: DatabaseType) -> Result<AnyPool> {
+    // Install drivers for AnyPool to work
+    sqlx::any::install_default_drivers();
+
+    let pool = AnyPoolOptions::new()
+        .max_connections(10) // Default max connections
+        .acquire_timeout(Duration::from_secs(30)) // Default timeout
+        .connect(database_url)
+        .await?;
+
+    let _ = db_type; // Use the parameter to avoid unused variable warning
+    Ok(pool)
+}
+
 /// Supported database types
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum DatabaseType {
     PostgreSQL,
+    Postgres, // Alias for PostgreSQL
     MySQL,
     SQLite,
 }
