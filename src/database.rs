@@ -13,6 +13,9 @@ impl Database {
     pub async fn new(config: &DuckLakeConfig) -> Result<Self> {
         config.validate()?;
 
+        // Install drivers for AnyPool to work
+        sqlx::any::install_default_drivers();
+
         let pool = AnyPoolOptions::new()
             .max_connections(config.max_connections)
             .acquire_timeout(Duration::from_secs(config.connection_timeout_secs))

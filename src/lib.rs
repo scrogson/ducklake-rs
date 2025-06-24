@@ -5,10 +5,13 @@
 
 pub mod config;
 pub mod database;
+pub mod ducklake;
 pub mod error;
 pub mod models;
+pub mod queries;
 
 pub use database::DatabaseType;
+pub use ducklake::{ColumnDefinition, DuckLake, FileColumnStatistics, TimeTravel};
 pub use error::{DuckLakeError, Result};
 
 /// Re-export commonly used types

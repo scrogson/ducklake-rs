@@ -84,3 +84,39 @@ pub struct Metadata {
     pub key: String,
     pub value: String,
 }
+
+// Query result structs for simplified data retrieval
+
+/// Simplified schema information for queries
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SchemaInfo {
+    pub schema_id: i64,
+    pub schema_name: String,
+}
+
+/// Simplified table information for queries
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TableInfo {
+    pub table_id: i64,
+    pub table_name: String,
+}
+
+/// Simplified column information for queries
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ColumnInfo {
+    pub column_id: i64,
+    pub column_name: String,
+    pub column_type: String,
+    pub nulls_allowed: bool,
+}
+
+/// Simplified data file information for queries
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DataFileInfo {
+    pub data_file_id: i64,
+    pub data_file_path: String,
+    pub path_is_relative: bool,
+    pub record_count: i64,
+    pub file_size_bytes: i64,
+    pub delete_file_path: Option<String>,
+}

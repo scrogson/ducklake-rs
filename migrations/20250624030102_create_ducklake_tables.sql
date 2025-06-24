@@ -12,7 +12,7 @@ CREATE TABLE ducklake_metadata (
 -- Snapshots table - tracks all snapshots (commits) in the DuckLake
 CREATE TABLE ducklake_snapshot (
     snapshot_id BIGINT PRIMARY KEY,
-    snapshot_time TIMESTAMP NOT NULL,
+    snapshot_time TIMESTAMPTZ NOT NULL,
     schema_version BIGINT NOT NULL,
     next_catalog_id BIGINT NOT NULL,
     next_file_id BIGINT NOT NULL
