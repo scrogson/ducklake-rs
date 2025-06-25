@@ -1,5 +1,7 @@
 use clap::{Parser, Subcommand};
 use ducklake::{Lakehouse, StorageBackend, StorageConfig};
+use sqlx::any::{install_default_drivers, AnyPoolOptions};
+use std::time::Duration;
 
 #[derive(Parser)]
 #[command(name = "ducklake")]
@@ -27,6 +29,9 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
+    /// Database migration commands
+    #[command(subcommand)]
+    Migrate(MigrateCommands),
     /// Initialize a new DuckLake catalog
     Init {
         /// Force initialization even if catalog exists
@@ -61,6 +66,22 @@ enum Commands {
         schema: String,
         /// Table name
         table: String,
+    },
+}
+
+#[derive(Subcommand)]
+enum MigrateCommands {
+    /// Run pending migrations
+    Run,
+    /// Revert the last migration
+    Revert,
+    /// Show migration status
+    Info,
+    /// Add a new migration
+    Add {
+        /// Migration name
+        #[arg(long)]
+        name: String,
     },
 }
 
@@ -102,6 +123,38 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     match cli.command {
+        Commands::Migrate(migrate_cmd) => {
+            match migrate_cmd {
+                MigrateCommands::Run => {
+                    println!("Running database migrations...");
+
+                    // Install drivers for AnyPool to work
+                    install_default_drivers();
+
+                    let pool = AnyPoolOptions::new()
+                        .max_connections(10)
+                        .acquire_timeout(Duration::from_secs(30))
+                        .connect(&cli.database_url)
+                        .await?;
+
+                    sqlx::migrate!("./migrations").run(&pool).await?;
+                    println!("Migrations completed successfully!");
+                    Ok(())
+                }
+                MigrateCommands::Revert => {
+                    println!("Migration revert not implemented yet");
+                    Ok(())
+                }
+                MigrateCommands::Info => {
+                    println!("Migration info not implemented yet");
+                    Ok(())
+                }
+                MigrateCommands::Add { name } => {
+                    println!("Migration add not implemented yet: {}", name);
+                    Ok(())
+                }
+            }
+        }
         Commands::Init { force } => {
             println!("Initializing DuckLake catalog...");
             // TODO: Implement initialization

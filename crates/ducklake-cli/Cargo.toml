@@ -17,6 +17,7 @@ serde_json = { workspace = true }
 thiserror = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
+sqlx = { workspace = true, features = ["migrate"] }
 
 # Internal dependencies
 ducklake = { path = "../ducklake", features = ["full"] }

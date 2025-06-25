@@ -3,14 +3,17 @@
 use arrow::array::RecordBatch;
 use ducklake_core::config::DuckLakeConfig;
 use ducklake_core::DuckLake;
+use ducklake_parquet::{ParquetManager, ParquetReadConfig, ParquetWriteConfig};
 use ducklake_storage::local::LocalFileSystem;
 use ducklake_storage::FileSystem;
+
 use uuid::Uuid;
 
 /// High-level lakehouse interface that orchestrates all components
 pub struct Lakehouse {
     core: DuckLake,
     filesystem: Box<dyn FileSystem + Send + Sync>,
+    parquet_manager: ParquetManager,
 }
 
 impl Lakehouse {
@@ -27,13 +30,24 @@ impl Lakehouse {
         };
 
         let database = ducklake_core::database::Database::new(&config).await?;
+
         let core = DuckLake::new(database.pool().clone());
         let filesystem = Box::new(
             LocalFileSystem::new(storage_path)
                 .map_err(|e| ducklake_core::error::DuckLakeError::ConfigError(e.to_string()))?,
         );
 
-        Ok(Self { core, filesystem })
+        // Create ParquetManager with a clone of the filesystem
+        let parquet_manager = ParquetManager::new(Box::new(
+            LocalFileSystem::new(config.data_path)
+                .map_err(|e| ducklake_core::error::DuckLakeError::ConfigError(e.to_string()))?,
+        ));
+
+        Ok(Self {
+            core,
+            filesystem,
+            parquet_manager,
+        })
     }
 
     /// Write data to a table using Parquet files
@@ -43,16 +57,58 @@ impl Lakehouse {
         table_name: &str,
         data: Vec<RecordBatch>,
     ) -> ducklake_core::Result<()> {
-        // TODO: Implement high-level write operation
-        // 1. Write data to Parquet files using ducklake-parquet
-        // 2. Collect statistics
-        // 3. Update metadata using ducklake-core
-        // 4. Handle transactions and snapshots
+        if data.is_empty() {
+            return Err(ducklake_core::error::DuckLakeError::ConfigError(
+                "Cannot write empty data".to_string(),
+            ));
+        }
 
-        let _ = (&schema_name, &table_name, &data);
-        Err(ducklake_core::error::DuckLakeError::ConfigError(
-            "Write operation not yet implemented".to_string(),
-        ))
+        // 1. Get table ID from schema and table names
+        let table_id = self.get_table_id(schema_name, table_name).await?;
+
+        // 2. Generate a unique file path
+        let file_path = format!(
+            "{}/{}/{}/data_{}.parquet",
+            schema_name,
+            table_name,
+            Uuid::new_v4(),
+            table_id
+        );
+
+        // 3. Write data to Parquet file using ducklake-parquet
+        let write_config = ParquetWriteConfig::default();
+        let file_stats = self
+            .parquet_manager
+            .write_file(&file_path, data.clone(), write_config)
+            .await
+            .map_err(|e| ducklake_core::error::DuckLakeError::ConfigError(e.to_string()))?;
+
+        // 4. Convert parquet column stats to core column stats
+        let column_statistics: Vec<ducklake_core::FileColumnStatistics> = file_stats
+            .column_stats
+            .into_iter()
+            .map(|col_stat| ducklake_core::FileColumnStatistics {
+                column_id: col_stat.column_id,
+                value_count: col_stat.value_count as i64,
+                null_count: col_stat.null_count as i64,
+                nan_count: col_stat.nan_count as i64,
+                min_value: col_stat.min_value,
+                max_value: col_stat.max_value,
+            })
+            .collect();
+
+        // 5. Insert file record and statistics using core method
+        self.core
+            .insert_data_file(
+                table_id,
+                &file_path,
+                file_stats.record_count as i64,
+                file_stats.file_size_bytes as i64,
+                column_statistics,
+            )
+            .await?;
+
+        Ok(())
     }
 
     /// Read data from a table with optional time travel
@@ -62,20 +118,190 @@ impl Lakehouse {
         table_name: &str,
         snapshot_id: Option<Uuid>,
     ) -> ducklake_core::Result<Vec<RecordBatch>> {
-        // TODO: Implement high-level read operation
         // 1. Get table metadata and file list from ducklake-core
-        // 2. Read Parquet files using ducklake-parquet
-        // 3. Handle time travel if snapshot_id is provided
-        // 4. Apply any necessary schema evolution
+        let table_id = self.get_table_id(schema_name, table_name).await?;
+        let files = self.core.list_data_files(table_id).await?;
 
-        let _ = (&schema_name, &table_name, &snapshot_id);
-        Err(ducklake_core::error::DuckLakeError::ConfigError(
-            "Read operation not yet implemented".to_string(),
-        ))
+        if files.is_empty() {
+            return Ok(Vec::new());
+        }
+
+        // 2. Read all Parquet files and combine the results
+        let mut all_batches = Vec::new();
+        let read_config = ParquetReadConfig::default();
+
+        for file in files {
+            // TODO: Apply snapshot filtering if snapshot_id is provided
+            let _ = snapshot_id; // Silence unused warning for now
+
+            match self
+                .parquet_manager
+                .read_file(&file.data_file_path, read_config.clone())
+                .await
+            {
+                Ok(mut batches) => {
+                    all_batches.append(&mut batches);
+                }
+                Err(e) => {
+                    tracing::warn!("Failed to read file {}: {}", file.data_file_path, e);
+                    // Continue reading other files rather than failing completely
+                }
+            }
+        }
+
+        // 3. TODO: Apply any necessary schema evolution
+        // 4. TODO: Apply filters or projections if specified
+
+        Ok(all_batches)
     }
 
     /// Get the underlying DuckLake core for advanced operations
     pub fn core(&self) -> &DuckLake {
         &self.core
+    }
+
+    /// Helper function to get table ID from schema and table names
+    async fn get_table_id(
+        &self,
+        schema_name: &str,
+        table_name: &str,
+    ) -> ducklake_core::Result<i64> {
+        // First get schema ID
+        let schemas = self.core.list_schemas().await?;
+        let schema_id = schemas
+            .iter()
+            .find(|s| s.schema_name == schema_name)
+            .map(|s| s.schema_id)
+            .ok_or_else(|| {
+                ducklake_core::error::DuckLakeError::ConfigError(format!(
+                    "Schema '{}' not found",
+                    schema_name
+                ))
+            })?;
+
+        // Then get table ID
+        let tables = self.core.list_tables(schema_id).await?;
+        let table_id = tables
+            .iter()
+            .find(|t| t.table_name == table_name)
+            .map(|t| t.table_id)
+            .ok_or_else(|| {
+                ducklake_core::error::DuckLakeError::ConfigError(format!(
+                    "Table '{}' not found in schema '{}'",
+                    table_name, schema_name
+                ))
+            })?;
+
+        Ok(table_id)
+    }
+
+    /// Helper function to get schema ID from schema name
+    async fn get_schema_id(&self, schema_name: &str) -> ducklake_core::Result<i64> {
+        let schemas = self.core.list_schemas().await?;
+        schemas
+            .iter()
+            .find(|s| s.schema_name == schema_name)
+            .map(|s| s.schema_id)
+            .ok_or_else(|| {
+                ducklake_core::error::DuckLakeError::ConfigError(format!(
+                    "Schema '{}' not found",
+                    schema_name
+                ))
+            })
+    }
+
+    /// Create a schema
+    pub async fn create_schema(&self, schema_name: &str) -> ducklake_core::Result<()> {
+        self.core.create_schema(schema_name).await?;
+        Ok(())
+    }
+
+    /// Create a table with the given schema
+    pub async fn create_table(
+        &self,
+        schema_name: &str,
+        table_name: &str,
+        columns: Vec<ducklake_core::ColumnDefinition>,
+    ) -> ducklake_core::Result<()> {
+        let schema_id = self.get_schema_id(schema_name).await?;
+        self.core
+            .create_table(schema_id, table_name, columns)
+            .await?;
+        Ok(())
+    }
+
+    /// List all schemas
+    pub async fn list_schemas(&self) -> ducklake_core::Result<Vec<String>> {
+        let schemas = self.core.list_schemas().await?;
+        Ok(schemas.into_iter().map(|s| s.schema_name).collect())
+    }
+
+    /// List tables in a schema
+    pub async fn list_tables(&self, schema_name: &str) -> ducklake_core::Result<Vec<String>> {
+        let schema_id = self.get_schema_id(schema_name).await?;
+        let tables = self.core.list_tables(schema_id).await?;
+        Ok(tables.into_iter().map(|t| t.table_name).collect())
+    }
+
+    /// Get table structure
+    pub async fn show_table_structure(
+        &self,
+        schema_name: &str,
+        table_name: &str,
+    ) -> ducklake_core::Result<Vec<ducklake_core::ColumnDefinition>> {
+        let table_id = self.get_table_id(schema_name, table_name).await?;
+        let columns = self.core.table_structure(table_id).await?;
+
+        // Convert ColumnInfo to ColumnDefinition
+        let column_defs = columns
+            .into_iter()
+            .map(|col| ducklake_core::ColumnDefinition {
+                column_id: Some(col.column_id),
+                name: col.column_name,
+                data_type: col.column_type,
+                nullable: col.nulls_allowed,
+            })
+            .collect();
+
+        Ok(column_defs)
+    }
+
+    /// Compact files for a table (merge small files into larger ones)
+    pub async fn compact_table(
+        &self,
+        schema_name: &str,
+        table_name: &str,
+    ) -> ducklake_core::Result<()> {
+        // 1. Get list of all files for the table
+        let table_id = self.get_table_id(schema_name, table_name).await?;
+        let files = self.core.list_data_files(table_id).await?;
+
+        if files.len() <= 1 {
+            return Ok(()); // Nothing to compact
+        }
+
+        // 2. Read all files and merge them
+        let file_paths: Vec<String> = files.iter().map(|f| f.data_file_path.clone()).collect();
+        let output_path = format!(
+            "{}/{}/compacted_{}.parquet",
+            schema_name,
+            table_name,
+            Uuid::new_v4()
+        );
+
+        let write_config = ParquetWriteConfig::default();
+        let _compacted_stats = self
+            .parquet_manager
+            .merge_files(&file_paths, &output_path, write_config)
+            .await
+            .map_err(|e| ducklake_core::error::DuckLakeError::ConfigError(e.to_string()))?;
+
+        // 3. TODO: Update metadata to reflect the compaction
+        // - Create new file record for compacted file
+        // - Mark old files as deleted or remove them
+        // - Create new snapshot
+
+        tracing::info!("Compacted {} files into {}", files.len(), output_path);
+        Ok(())
     }
 }

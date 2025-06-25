@@ -39,6 +39,8 @@ azure = ["ducklake-storage/azure"]
 
 [dev-dependencies]
 tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
+tracing-subscriber = { workspace = true }
+sqlx = { workspace = true }
 
 [[example]]
 name = "basic"
@@ -47,3 +49,7 @@ path = "../../examples/basic.rs"
 [[example]]
 name = "full_api"
 path = "../../examples/full_api.rs"
+
+[[example]]
+name = "comprehensive"
+path = "../../examples/comprehensive.rs"

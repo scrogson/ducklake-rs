@@ -11,6 +11,10 @@ use chrono::{DateTime, Utc};
 use std::collections::HashMap;
 use thiserror::Error;
 
+#[cfg(feature = "azure")]
+pub mod azure;
+#[cfg(feature = "gcp")]
+pub mod gcs;
 pub mod local;
 pub mod path;
 #[cfg(feature = "s3")]
@@ -57,6 +61,17 @@ pub enum StorageBackend {
         bucket: String,
         region: String,
     },
+    #[cfg(feature = "gcp")]
+    Gcs {
+        bucket: String,
+        service_account_path: Option<String>,
+    },
+    #[cfg(feature = "azure")]
+    Azure {
+        account: String,
+        container: String,
+        access_key: Option<String>,
+    },
 }
 
 /// Trait for file system operations
@@ -94,5 +109,21 @@ pub fn create_filesystem(config: StorageConfig) -> Result<Box<dyn FileSystem>> {
         StorageBackend::S3 { bucket, region } => {
             Ok(Box::new(s3::S3FileSystem::new(bucket, region)?))
         }
+        #[cfg(feature = "gcp")]
+        StorageBackend::Gcs {
+            bucket,
+            service_account_path,
+        } => Ok(Box::new(gcs::GcsFileSystem::new(
+            bucket,
+            service_account_path,
+        )?)),
+        #[cfg(feature = "azure")]
+        StorageBackend::Azure {
+            account,
+            container,
+            access_key,
+        } => Ok(Box::new(azure::AzureFileSystem::new(
+            account, container, access_key,
+        )?)),
     }
 }

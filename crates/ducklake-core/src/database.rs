@@ -30,12 +30,6 @@ impl Database {
         &self.pool
     }
 
-    /// Run database migrations
-    pub async fn migrate(&self) -> Result<()> {
-        sqlx::migrate!("./migrations").run(&self.pool).await?;
-        Ok(())
-    }
-
     /// Check if the database is healthy
     pub async fn health_check(&self) -> Result<()> {
         sqlx::query("SELECT 1").execute(&self.pool).await?;

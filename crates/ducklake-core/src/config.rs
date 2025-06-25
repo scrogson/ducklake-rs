@@ -47,6 +47,7 @@ impl DuckLakeConfig {
         } else if self.database_url.starts_with("mysql://") {
             Ok(DatabaseType::MySQL)
         } else if self.database_url.starts_with("sqlite://")
+            || self.database_url.starts_with("sqlite:")
             || self.database_url.ends_with(".db")
             || self.database_url.ends_with(".sqlite")
         {

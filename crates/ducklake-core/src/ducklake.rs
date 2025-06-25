@@ -22,6 +22,11 @@ impl DuckLake {
         Self { pool }
     }
 
+    /// Get the database pool (for advanced use cases)
+    pub fn pool(&self) -> &AnyPool {
+        &self.pool
+    }
+
     /// Get the current snapshot ID
     pub async fn current_snapshot(&self) -> Result<Option<i64>> {
         ReadQueries::get_current_snapshot(&self.pool).await

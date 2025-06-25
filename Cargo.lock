@@ -1191,6 +1191,7 @@ dependencies = [
  "thiserror",
  "tokio",
  "tracing",
+ "tracing-subscriber",
  "uuid",
 ]
 
@@ -1202,6 +1203,7 @@ dependencies = [
  "ducklake",
  "serde",
  "serde_json",
+ "sqlx",
  "thiserror",
  "tokio",
  "tracing",
@@ -1229,8 +1231,10 @@ version = "0.1.0"
 dependencies = [
  "arrow",
  "async-trait",
+ "bytes",
  "ducklake-core",
  "ducklake-storage",
+ "hex",
  "parquet",
  "serde",
  "serde_json",
@@ -1247,10 +1251,12 @@ dependencies = [
  "async-trait",
  "aws-sdk-s3",
  "chrono",
+ "futures",
  "object_store",
  "serde",
  "thiserror",
  "tokio",
+ "tokio-stream",
  "tracing",
 ]
 

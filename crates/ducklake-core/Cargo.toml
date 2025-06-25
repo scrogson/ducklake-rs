@@ -6,7 +6,7 @@ description = "Core metadata management for DuckLake lakehouse format"
 license = "MIT"
 
 [dependencies]
-sqlx = { workspace = true, features = ["migrate"] }
+sqlx = { workspace = true }
 tokio = { workspace = true }
 uuid = { workspace = true }
 chrono = { workspace = true }

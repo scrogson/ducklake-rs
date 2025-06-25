@@ -35,6 +35,10 @@ datafusion = "47.0"
 # Object storage
 object_store = { version = "0.9", features = ["aws", "gcp", "azure"] }
 aws-sdk-s3 = "1.0"
+futures = "0.3"
+tokio-stream = "0.1"
+hex = "0.4"
+bytes = "1.0"
 
 # CLI
 clap = { version = "4.0", features = ["derive", "env"] }
