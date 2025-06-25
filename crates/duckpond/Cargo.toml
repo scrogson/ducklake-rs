@@ -1,8 +1,8 @@
 [package]
 name = "duckpond"
-version = "0.1.0"
+version = "0.0.1"
 edition = "2021"
-authors = ["Your Name <your.email@example.com>"]
+authors = ["Sonny Scroggin <sonny@scrogg.in>"]
 description = "A Rust implementation of the DuckLake lakehouse format specification"
 license = "MIT"
 repository = "https://github.com/your-username/duckpond-rs"

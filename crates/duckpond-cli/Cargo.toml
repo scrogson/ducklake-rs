@@ -1,7 +1,8 @@
 [package]
 name = "duckpond-cli"
-version = "0.1.0"
+version = "0.0.1"
 edition = "2021"
+authors = ["Sonny Scroggin <sonny@scrogg.in>"]
 description = "Command-line tools for DuckLake administration"
 license = "MIT"
 

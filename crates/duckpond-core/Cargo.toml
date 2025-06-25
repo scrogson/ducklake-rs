@@ -1,7 +1,8 @@
 [package]
 name = "duckpond-core"
-version = "0.1.0"
+version = "0.0.1"
 edition = "2021"
+authors = ["Sonny Scroggin <sonny@scrogg.in>"]
 description = "Core metadata management for DuckLake lakehouse format"
 license = "MIT"
 

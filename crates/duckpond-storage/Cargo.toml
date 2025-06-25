@@ -1,7 +1,8 @@
 [package]
 name = "duckpond-storage"
-version = "0.1.0"
+version = "0.0.1"
 edition = "2021"
+authors = ["Sonny Scroggin <sonny@scrogg.in>"]
 description = "File system abstraction for DuckLake (S3, GCS, Azure, Local)"
 license = "MIT"
 
