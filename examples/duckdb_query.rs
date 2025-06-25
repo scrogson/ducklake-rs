@@ -1,13 +1,13 @@
-use ducklake::{Lakehouse, StorageBackend, StorageConfig};
+use duckpond::{Lakehouse, StorageBackend, StorageConfig};
 use std::process::Command;
 
-/// Example showing how to query DuckLake data using DuckDB
+/// Example showing how to query DuckPond data using DuckDB
 ///
 /// This demonstrates the practical approach for querying Parquet files
-/// that are managed by the DuckLake catalog.
+/// that are managed by the DuckPond catalog.
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    println!("🦆 DuckLake + DuckDB Query Example");
+    println!("🦆 DuckPond + DuckDB Query Example");
     println!("===================================");
 
     // Create storage configuration
@@ -20,7 +20,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Connect to the lakehouse
     let lakehouse =
-        Lakehouse::new("sqlite://ducklake.db?mode=rwc".to_string(), storage_config).await?;
+        Lakehouse::new("sqlite://duckpond.db?mode=rwc".to_string(), storage_config).await?;
 
     // 1. Use the catalog to discover tables and their file locations
     println!("📋 Discovering tables in the catalog...");

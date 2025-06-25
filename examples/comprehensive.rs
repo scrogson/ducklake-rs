@@ -1,4 +1,4 @@
-//! Comprehensive example demonstrating DuckLake functionality
+//! Comprehensive example demonstrating DuckPond functionality
 //!
 //! This example shows:
 //! - Creating schemas and tables
@@ -9,7 +9,7 @@
 
 use arrow::array::{Int64Array, RecordBatch, StringArray};
 use arrow::datatypes::{DataType, Field, Schema};
-use ducklake::{ColumnDefinition, Lakehouse, StorageBackend, StorageConfig};
+use duckpond::{ColumnDefinition, Lakehouse, StorageBackend, StorageConfig};
 use std::sync::Arc;
 
 #[tokio::main]
@@ -17,11 +17,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Initialize tracing
     tracing_subscriber::fmt::init();
 
-    println!("🦆 DuckLake Comprehensive Example");
+    println!("🦆 DuckPond Comprehensive Example");
     println!("==================================");
 
     // 1. Setup lakehouse with local storage
-    let database_url = "sqlite://ducklake.db".to_string();
+    let database_url = "sqlite://duckpond.db".to_string();
     let storage_path = "./example_data".to_string();
 
     // Ensure data directory exists

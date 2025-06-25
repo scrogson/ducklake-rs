@@ -1,13 +1,13 @@
 use arrow::array::*;
-use ducklake::{Lakehouse, StorageBackend, StorageConfig};
+use duckpond::{Lakehouse, StorageBackend, StorageConfig};
 
-/// Example showing how to read data from DuckLake tables
+/// Example showing how to read data from DuckPond tables
 ///
 /// This demonstrates using the Lakehouse API to read Parquet data
 /// programmatically using Apache Arrow.
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    println!("🏠 DuckLake Data Reading Example");
+    println!("🏠 DuckPond Data Reading Example");
     println!("=================================");
 
     // Create storage configuration
@@ -20,7 +20,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Connect to the lakehouse
     let lakehouse =
-        Lakehouse::new("sqlite://ducklake.db?mode=rwc".to_string(), storage_config).await?;
+        Lakehouse::new("sqlite://duckpond.db?mode=rwc".to_string(), storage_config).await?;
 
     // Read data from the user_events table
     println!("📖 Reading data from analytics.user_events...");

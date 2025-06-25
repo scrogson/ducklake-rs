@@ -1,10 +1,10 @@
 [workspace]
 members = [
-    "crates/ducklake-core",
-    "crates/ducklake-storage",
-    "crates/ducklake-parquet",
-    "crates/ducklake",
-    "crates/ducklake-cli",
+    "crates/duckpond-core",
+    "crates/duckpond-storage",
+    "crates/duckpond-parquet",
+    "crates/duckpond",
+    "crates/duckpond-cli",
 ]
 resolver = "2"
 

@@ -1,0 +1,55 @@
+[package]
+name = "duckpond"
+version = "0.1.0"
+edition = "2021"
+authors = ["Your Name <your.email@example.com>"]
+description = "A Rust implementation of the DuckLake lakehouse format specification"
+license = "MIT"
+repository = "https://github.com/your-username/duckpond-rs"
+keywords = ["lakehouse", "data", "parquet", "sql", "duckdb"]
+categories = ["database", "data-structures"]
+readme = "../../README.md"
+
+[lib]
+name = "duckpond"
+path = "src/lib.rs"
+
+[dependencies]
+tokio = { workspace = true }
+serde = { workspace = true }
+thiserror = { workspace = true }
+async-trait = { workspace = true }
+tracing = { workspace = true }
+sqlx = { workspace = true }
+uuid = { workspace = true }
+arrow = { workspace = true }
+
+# Internal dependencies - the main crate orchestrates everything
+duckpond-core = { path = "../duckpond-core" }
+duckpond-storage = { path = "../duckpond-storage" }
+duckpond-parquet = { path = "../duckpond-parquet" }
+
+[features]
+default = ["local"]
+full = ["local", "s3", "gcp", "azure"]
+local = ["duckpond-storage/local"]
+s3 = ["duckpond-storage/s3"]
+gcp = ["duckpond-storage/gcp"]
+azure = ["duckpond-storage/azure"]
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
+tracing-subscriber = { workspace = true }
+sqlx = { workspace = true }
+
+[[example]]
+name = "comprehensive"
+path = "../../examples/comprehensive.rs"
+
+[[example]]
+name = "read_data"
+path = "../../examples/read_data.rs"
+
+[[example]]
+name = "duckdb_query"
+path = "../../examples/duckdb_query.rs"

@@ -1178,14 +1178,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1aaf95b3e5c8f23aa320147307562d361db0ae0d51242340f558153b4eb2439b"
 
 [[package]]
-name = "ducklake"
+name = "duckpond"
 version = "0.1.0"
 dependencies = [
  "arrow",
  "async-trait",
- "ducklake-core",
- "ducklake-parquet",
- "ducklake-storage",
+ "duckpond-core",
+ "duckpond-parquet",
+ "duckpond-storage",
  "serde",
  "sqlx",
  "thiserror",
@@ -1196,11 +1196,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "ducklake-cli"
+name = "duckpond-cli"
 version = "0.1.0"
 dependencies = [
  "clap",
- "ducklake",
+ "duckpond",
  "serde",
  "serde_json",
  "sqlx",
@@ -1211,7 +1211,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "ducklake-core"
+name = "duckpond-core"
 version = "0.1.0"
 dependencies = [
  "async-trait",
@@ -1226,14 +1226,14 @@ dependencies = [
 ]
 
 [[package]]
-name = "ducklake-parquet"
+name = "duckpond-parquet"
 version = "0.1.0"
 dependencies = [
  "arrow",
  "async-trait",
  "bytes",
- "ducklake-core",
- "ducklake-storage",
+ "duckpond-core",
+ "duckpond-storage",
  "hex",
  "parquet",
  "serde",
@@ -1245,7 +1245,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "ducklake-storage"
+name = "duckpond-storage"
 version = "0.1.0"
 dependencies = [
  "async-trait",
