@@ -67,6 +67,22 @@ enum Commands {
         /// Table name
         table: String,
     },
+    /// Query data from a table
+    Query {
+        /// Schema name
+        schema: String,
+        /// Table name
+        table: String,
+        /// Limit number of rows returned
+        #[arg(long, default_value = "10")]
+        limit: usize,
+        /// Column names to select (comma-separated)
+        #[arg(long)]
+        columns: Option<String>,
+        /// Output format (table, json, csv)
+        #[arg(long, default_value = "table")]
+        format: String,
+    },
 }
 
 #[derive(Subcommand)]
@@ -271,6 +287,40 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     "  {} {} {}",
                     column.column_name, column.column_type, nullable
                 );
+            }
+            Ok(())
+        }
+        Commands::Query {
+            schema,
+            table,
+            limit,
+            columns,
+            format,
+        } => {
+            let lakehouse = Lakehouse::new(cli.database_url, storage_config).await?;
+
+            // First get the schema to find its ID
+            let schemas = lakehouse.core().list_schemas().await?;
+            let schema_info = schemas
+                .iter()
+                .find(|s| s.schema_name == schema)
+                .ok_or_else(|| format!("Schema '{}' not found", schema))?;
+
+            // Then get the table to find its ID
+            let tables = lakehouse.core().list_tables(schema_info.schema_id).await?;
+            let table_info = tables
+                .iter()
+                .find(|t| t.table_name == table)
+                .ok_or_else(|| format!("Table '{}' not found in schema '{}'", table, schema))?;
+
+            let query_result = lakehouse
+                .core()
+                .query_data(table_info.table_id, limit, columns, format)
+                .await?;
+
+            println!("Query result:");
+            for row in query_result {
+                println!("{}", row);
             }
             Ok(())
         }

@@ -1,7 +1,7 @@
 use crate::error::DuckLakeError;
 use crate::models::*;
 use chrono::{DateTime, Utc};
-use sqlx::{Any, AnyPool, Executor, Row};
+use sqlx::{Any, Executor, Row};
 use uuid::Uuid;
 
 /// Reading operations for DuckLake metadata

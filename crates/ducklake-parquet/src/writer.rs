@@ -68,7 +68,7 @@ pub async fn write_parquet_file(
     }
 
     // 4. Close the writer to finalize the file
-    let writer_metadata = writer.close().map_err(|e| ParquetError::ParquetError(e))?;
+    let _writer_metadata = writer.close().map_err(|e| ParquetError::ParquetError(e))?;
 
     // 5. Upload the file to storage
     filesystem

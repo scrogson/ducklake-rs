@@ -12,6 +12,7 @@ use uuid::Uuid;
 /// High-level lakehouse interface that orchestrates all components
 pub struct Lakehouse {
     core: DuckLake,
+    #[allow(dead_code)] // TODO: May be used for advanced file operations
     filesystem: Box<dyn FileSystem + Send + Sync>,
     parquet_manager: ParquetManager,
 }

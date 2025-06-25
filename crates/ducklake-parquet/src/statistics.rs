@@ -45,8 +45,8 @@ pub async fn collect_file_statistics(
     for (col_index, field) in schema.fields().iter().enumerate() {
         let mut value_count = 0u64;
         let mut null_count = 0u64;
-        let mut min_value: Option<String> = None;
-        let mut max_value: Option<String> = None;
+        let min_value: Option<String> = None;
+        let max_value: Option<String> = None;
 
         // Aggregate statistics across all row groups
         for rg_index in 0..row_group_count {
@@ -86,6 +86,7 @@ pub async fn collect_file_statistics(
 }
 
 /// Convert raw bytes to string representation based on physical type
+#[allow(dead_code)] // TODO: Will be used when statistics extraction is implemented
 fn bytes_to_string(bytes: &[u8], physical_type: parquet::basic::Type) -> String {
     use parquet::basic::Type;
 

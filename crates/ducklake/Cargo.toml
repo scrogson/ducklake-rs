@@ -43,13 +43,13 @@ tracing-subscriber = { workspace = true }
 sqlx = { workspace = true }
 
 [[example]]
-name = "basic"
-path = "../../examples/basic.rs"
-
-[[example]]
-name = "full_api"
-path = "../../examples/full_api.rs"
-
-[[example]]
 name = "comprehensive"
 path = "../../examples/comprehensive.rs"
+
+[[example]]
+name = "read_data"
+path = "../../examples/read_data.rs"
+
+[[example]]
+name = "duckdb_query"
+path = "../../examples/duckdb_query.rs"

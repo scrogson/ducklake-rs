@@ -5,7 +5,7 @@ use crate::{FileMetadata, FileSystem, Result, StorageError};
 #[cfg(feature = "azure")]
 use async_trait::async_trait;
 #[cfg(feature = "azure")]
-use chrono::{DateTime, Utc};
+// use chrono::{DateTime, Utc}; // TODO: Implement when needed
 #[cfg(feature = "azure")]
 use object_store::{azure::MicrosoftAzureBuilder, Error as ObjectStoreError, ObjectStore};
 #[cfg(feature = "azure")]
@@ -14,6 +14,7 @@ use std::sync::Arc;
 #[cfg(feature = "azure")]
 pub struct AzureFileSystem {
     store: Arc<dyn ObjectStore>,
+    #[allow(dead_code)] // TODO: May be needed for advanced operations
     container: String,
 }
 
@@ -132,7 +133,6 @@ impl FileSystem for AzureFileSystem {
 
     async fn list_files(&self, prefix: &str) -> Result<Vec<FileMetadata>> {
         use object_store::path::Path;
-        use object_store::ObjectMeta;
 
         let prefix_path = if prefix.is_empty() {
             None

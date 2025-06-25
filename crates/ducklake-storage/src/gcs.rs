@@ -5,7 +5,7 @@ use crate::{FileMetadata, FileSystem, Result, StorageError};
 #[cfg(feature = "gcp")]
 use async_trait::async_trait;
 #[cfg(feature = "gcp")]
-use chrono::{DateTime, Utc};
+// use chrono::{DateTime, Utc}; // TODO: Implement when needed
 #[cfg(feature = "gcp")]
 use object_store::{gcp::GoogleCloudStorageBuilder, Error as ObjectStoreError, ObjectStore};
 #[cfg(feature = "gcp")]
@@ -14,6 +14,7 @@ use std::sync::Arc;
 #[cfg(feature = "gcp")]
 pub struct GcsFileSystem {
     store: Arc<dyn ObjectStore>,
+    #[allow(dead_code)] // TODO: May be needed for advanced operations
     bucket: String,
 }
 
